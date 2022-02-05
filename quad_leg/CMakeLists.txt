@@ -33,19 +33,25 @@
 # Send over the SDF file so the particle example can be run "in place."
 # configure_file(models/urdf/leg.urdf "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
 
-add_library(quadrotor quadrotor_plant.cc quadrotor_plant.h quadrotor_geometry.cc quadrotor_geometry.h)
-target_link_libraries(quadrotor drake::drake)
+add_library(quad_leg quad_leg_plant.cc quad_leg_plant.h quad_leg_geometry.cc quad_leg_geometry.h)
+target_link_libraries(quad_leg drake::drake)
 
 set(GFLAGS_USE_TARGET_NAMESPACE OFF)
 find_package(gflags CONFIG REQUIRED)
 
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options REQUIRED )
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+
 # executables: run_quadrotor_dynamics.cc run_quadrotor_lqr.cc
 
-add_executable(run_quadrotor_lqr run_quadrotor_lqr.cc)
-target_link_libraries(run_quadrotor_lqr quadrotor drake::drake gflags)
+# add_executable(run_quad_leg_openloop run_quad_leg_openloop.cpp)
+# target_link_libraries(run_quad_leg_openloop quad_leg drake::drake gflags)
 
-# add_executable(run_quadrotor_dynamics run_quadrotor_dynamics.cc)
-# target_link_libraries(run_quadrotor_dynamics quadrotor drake::drake gflags)
+add_executable(run_quad_leg_openloop run_quad_leg_openloop.cpp)
+target_link_libraries(run_quad_leg_openloop drake::drake gflags)
+
+# add_executable(run_quad_leg_passive run_quad_leg_passive.cpp)
+# target_link_libraries(run_quad_leg_passive drake::drake gflags -lboost_system)
 
 
 
