@@ -39,6 +39,7 @@ DEFINE_double(max_time_step, 1.0e-4, "Simulation timstep used for integrator.");
 DEFINE_double(Kp_, 100.0, "Kp");
 DEFINE_double(Ki_, 0.0, "Ki");
 DEFINE_double(Kd_, 0.0, "Kd");
+DEFINE_double(initial_height, 1.0, "initial model height");
 
 
 namespace drake {
@@ -79,6 +80,34 @@ int do_main() {
     parser.AddModelFromFile(urdf_path);
   (void)plant_model_instance_index;
 
+  // def AddGround(self):
+  //       """
+  //       Add a flat ground with friction
+  //       """
+  //       X_BG = RigidTransform()
+  //       hfspce = HalfSpace()
+  //       surface_friction = CoulombFriction(
+  //               static_friction = 0.7,
+  //               dynamic_friction = 0.5)
+  //       self.plant.RegisterCollisionGeometry(
+  //               self.plant.world_body(),
+  //               X_BG,
+  //               hfspce,
+  //               "ground_collision",
+  //               surface_friction)
+  //       self.plant.RegisterVisualGeometry(
+  //               self.plant.world_body(),
+  //               X_BG,
+  //               hfspce,
+  //               "ground_visual",
+  //               np.array([0.5,0.5,0.5,0]))  # transparent
+
+  const math::RigidTransform<double> X_BG(Vector3<double>{0.0, 0.0, 0.0});
+  multibody::CoulombFriction<double> surface_friction = multibody::CoulombFriction(0.7, 0.5); //static_friction, dynamic_friction
+  quadleg->RegisterCollisionGeometry(quadleg->world_body(),X_BG,geometry::HalfSpace(),"ground_collision",surface_friction);
+  // quadleg->RegisterCollisionGeometry(quadleg->world_body(),X_BG,geometry::HalfSpace(),"ground_collision",surface_friction);
+
+
   // quadleg->AddJointActuator("a1", quadleg->GetJointByName("Actuator1")); //Use more descriptive names for actual robot
   // quadleg->AddJointActuator("a2", quadleg->GetJointByName("Actuator2")); //Use more descriptive names for actual robot
 
@@ -86,37 +115,48 @@ int do_main() {
   quadleg->Finalize();
 
   // Create the Controller (TODO: decide if InverseDynamicsController or InverseDynamics w/ xtra computation after)
-  const Eigen::VectorXd Kp = 
-    Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Kp_;
-  const Eigen::VectorXd Ki = 
-    Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Ki_;
-  const Eigen::VectorXd Kd = 
-    Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Kd_;
-  std::cout << quadleg->num_actuators() << " actuators\n";
-  // TODO: ADD P_x and P_y matrices bc this is a floating body model!!!!
-  Eigen::MatrixXd P_x =
-    Eigen::MatrixXd(quadleg->num_actuators() * 2, quadleg->num_multibody_states()) * 0.0; // quadleg->num_multibody_states() - 13
-  P_x(0,7)  = 1.0;
-  P_x(1,8)  = 1.0;
-  P_x(2,15) = 1.0;
-  P_x(3,16) = 1.0;
-  const Eigen::MatrixXd P_y =
-     Eigen::MatrixXd::Identity(quadleg->num_actuators(), quadleg->num_actuators());
-  const auto* const pid = 
-    builder.AddSystem<systems::controllers::PidController<double>>(P_x,P_y,Kp,Ki,Kd);
+  // const Eigen::VectorXd Kp = 
+  //   Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Kp_;
+  // const Eigen::VectorXd Ki = 
+  //   Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Ki_;
+  // const Eigen::VectorXd Kd = 
+  //   Eigen::VectorXd::Ones(quadleg->num_actuators()) * FLAGS_Kd_;
+  // std::cout << quadleg->num_actuators() << " actuators\n";
+  // // TODO: ADD P_x and P_y matrices bc this is a floating body model!!!!
+  // Eigen::MatrixXd P_x =
+  //   Eigen::MatrixXd(quadleg->num_actuators() * 2, quadleg->num_multibody_states()) * 0.0; // quadleg->num_multibody_states() - 13
+  // P_x(0,7)  = 1.0;
+  // P_x(1,8)  = 1.0;
+  // P_x(2,15) = 1.0;
+  // P_x(3,16) = 1.0;
+  // const Eigen::MatrixXd P_y =
+  //    Eigen::MatrixXd::Identity(quadleg->num_actuators(), quadleg->num_actuators());
+  // const auto* const pid = 
+  //   builder.AddSystem<systems::controllers::PidController<double>>(P_x,P_y,Kp,Ki,Kd);
 
-  builder.Connect(quadleg->get_state_output_port(),
-                  pid->get_input_port_estimated_state());
-  builder.Connect(pid->get_output_port_control(),
-                  quadleg->get_actuation_input_port());
+  // builder.Connect(quadleg->get_state_output_port(),
+  //                 pid->get_input_port_estimated_state());
+  // builder.Connect(pid->get_output_port_control(),
+  //                 quadleg->get_actuation_input_port());
 
-  // Set PID desired states
+  // // Set PID desired states
+  // auto desired_base_source = 
+  //   builder.AddSystem<systems::ConstantVectorSource<double>>(
+  //     Eigen::VectorXd::Zero(quadleg->num_actuators() * 2) //quadleg->num_multibody_states()
+  //   );
+  // builder.Connect(desired_base_source->get_output_port(),
+  //                 pid->get_input_port_desired_state());
+
+  /// temp fix to remove the controller!
   auto desired_base_source = 
     builder.AddSystem<systems::ConstantVectorSource<double>>(
-      Eigen::VectorXd::Zero(quadleg->num_actuators() * 2) //quadleg->num_multibody_states()
+      Eigen::VectorXd::Zero(quadleg->num_actuators()) //quadleg->num_multibody_states()
     );
   builder.Connect(desired_base_source->get_output_port(),
-                  pid->get_input_port_desired_state());
+                  quadleg->get_actuation_input_port()); 
+  ///
+                 
+
 
   // Connect plant with scene_graph to get collision information
   DRAKE_DEMAND(!!quadleg->get_source_id());
@@ -137,6 +177,18 @@ int do_main() {
   std::unique_ptr<systems::Context<double>> diagram_context = 
     diagram->CreateDefaultContext();
 
+  
+  // const systems::Context<double>& plant_context =
+  //     this->GetSubsystemContext(*plant_, context);
+  // systems::State<T>& plant_state =
+  //     this->GetMutableSubsystemState(*plant_, state);
+  // const math::RigidTransform<T> X_WB(
+  //     Vector3<T>{0.0, 0.0, FLAGS_initial_height});
+  // plant_->SetFreeBodyPose(
+  //     plant_context, &plant_state, plant_->GetBodyByName("base_link"), X_WB);   
+
+
+
   // Create plant_context to set velocity
   systems::Context<double>& plant_context = 
     diagram->GetMutableSubsystemContext(*quadleg, diagram_context.get());
@@ -145,6 +197,19 @@ int do_main() {
   positions[0] = 1.0;
   positions[8] = 0.4;
   quadleg->SetPositions(&plant_context, positions);
+  Eigen::VectorXd velocities = Eigen::VectorXd::Zero(quadleg->num_velocities());
+  positions[7] = 0.5;
+  // positions[8] = 0.4;
+  quadleg->SetVelocities(&plant_context, velocities);
+
+
+  systems::State<double>& plant_state =
+      diagram->GetMutableSubsystemState(*quadleg, diagram_context.get());
+  const math::RigidTransform<double> X_WB(
+      Vector3<double>{0.0, 0.0, FLAGS_initial_height});
+  quadleg->SetFreeBodyPose(
+      plant_context, &plant_state, quadleg->GetBodyByName("base_link"), X_WB); 
+
 
   systems::Simulator<double> simulator(*diagram, std::move(diagram_context));
   simulator.set_publish_every_time_step(true);
