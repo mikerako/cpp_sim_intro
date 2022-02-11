@@ -53,6 +53,8 @@ target_link_libraries(run_quad_leg_openloop drake::drake gflags)
 # add_executable(run_quad_leg_passive run_quad_leg_passive.cpp)
 # target_link_libraries(run_quad_leg_passive drake::drake gflags -lboost_system)
 
+add_executable(run_quadruped place_quadruped_in_visual.cpp)
+target_link_libraries(run_quadruped drake::drake gflags)
 
 
 # add_executable(particle_test particle_test.cc)
