@@ -4,8 +4,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="quadf">
-  <link
-    name="base">
+  <link name="base">
     <inertial>
       <origin
         xyz="-1.70385490158136E-14 -0.0138235985731072 -0.0264324777192774"
@@ -44,8 +43,7 @@
       </geometry>
     </collision>
   </link>
-  <link
-    name="front left hip">
+  <link name="front left hip">
     <inertial>
       <origin
         xyz="-0.000727243703443653 0.0921123421932154 -0.000198984132469628"
@@ -84,8 +82,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="front left hip joint"
+  <joint name="front left hip joint"
     type="revolute">
     <origin
       xyz="-0.125000000000013 0.282500000000001 -0.0266306081677672"
@@ -102,8 +99,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="left front UL">
+  <link name="left front UL">
     <inertial>
       <origin
         xyz="-0.000209681593038635 0.0403703958248971 0.104221698379794"
@@ -142,8 +138,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="left front UL joint"
+  <joint name="left front UL joint"
     type="revolute">
     <origin
       xyz="0.00170000000000001 0 0"
@@ -160,8 +155,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="left front LL">
+  <link name="left front LL">
     <inertial>
       <origin
         xyz="-4.82947015711943E-15 0.00719227035186162 0.0979123541407718"
@@ -200,8 +194,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="left front LL joint"
+  <joint name="left front LL joint"
     type="revolute">
     <origin
       xyz="0 0.0678 0.250000000000003"
@@ -218,8 +211,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="front right hip ">
+  <link name="front right hip">
     <inertial>
       <origin
         xyz="-0.000742117901801134 0.0882779459995091 0.000214154719464069"
@@ -240,7 +232,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="../meshes/front right hip .obj" />
+          filename="../meshes/front right hip.obj" />
       </geometry>
       <material
         name="">
@@ -254,12 +246,11 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="../meshes/front right hip .obj" />
+          filename="../meshes/front right hip.obj" />
       </geometry>
     </collision>
   </link>
-  <joint
-    name="front right hip joint"
+  <joint name="front right hip joint"
     type="revolute">
     <origin
       xyz="0.124999999999999 0.283000000000001 -0.0266306081677545"
@@ -267,7 +258,7 @@
     <parent
       link="base" />
     <child
-      link="front right hip " />
+      link="front right hip" />
     <axis
       xyz="0 -1 0" />
     <limit
@@ -276,8 +267,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="right front UL">
+  <link name="right front UL">
     <inertial>
       <origin
         xyz="-0.000209681593037359 0.0403703958248838 0.1042216983798"
@@ -316,14 +306,13 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="right front UL joint"
+  <joint name="right front UL joint"
     type="revolute">
     <origin
       xyz="0.00169999999999995 0 0"
       rpy="0 0 -1.5707963267949" />
     <parent
-      link="front right hip " />
+      link="front right hip" />
     <child
       link="right front UL" />
     <axis
@@ -334,8 +323,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="right front LL">
+  <link name="right front LL">
     <inertial>
       <origin
         xyz="-7.27196081129478E-15 0.00719227035185829 0.0979123541407722"
@@ -374,8 +362,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="right front LL joint"
+  <joint name="right front LL joint"
     type="revolute">
     <origin
       xyz="0 0.0677999999999798 0.250000000000016"
@@ -392,8 +379,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="Back left hip">
+  <link name="Back left hip">
     <inertial>
       <origin
         xyz="-0.000742117901777875 0.0882779459995155 0.000214154719464728"
@@ -432,8 +418,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="Back left hip joint"
+  <joint name="Back left hip joint"
     type="revolute">
     <origin
       xyz="-0.125000000000011 -0.310800000000001 -0.0266306081677699"
@@ -450,8 +435,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="left back UL">
+  <link name="left back UL">
     <inertial>
       <origin
         xyz="-0.000209681593043909 0.0403703958249091 0.104221698379799"
@@ -490,8 +474,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="left back UL joint"
+  <joint name="left back UL joint"
     type="revolute">
     <origin
       xyz="0.00169999999999795 0 0"
@@ -508,8 +491,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="left back LL">
+  <link name="left back LL">
     <inertial>
       <origin
         xyz="-4.38538094726937E-15 0.00719227035185818 0.0979123541407708"
@@ -548,8 +530,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="left back LL joint"
+  <joint name="left back LL joint"
     type="revolute">
     <origin
       xyz="0 0.067800000000012 0.250000000000008"
@@ -566,8 +547,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="Back right hip">
+  <link name="Back right hip">
     <inertial>
       <origin
         xyz="-0.000727243703443806 0.092112342193215 -0.000198984132470569"
@@ -606,8 +586,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="Back right hip joint"
+  <joint name="Back right hip joint"
     type="revolute">
     <origin
       xyz="0.12499999999998 -0.3103 -0.0266306081677744"
@@ -624,8 +603,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="right back UL">
+  <link name="right back UL">
     <inertial>
       <origin
         xyz="-0.000209681593039857 0.0403703958248969 0.104221698379792"
@@ -664,8 +642,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="right back UL joint"
+  <joint name="right back UL joint"
     type="revolute">
     <origin
       xyz="0.00169999999999998 0 0"
@@ -682,8 +659,7 @@
       effort="9"
       velocity="5" />
   </joint>
-  <link
-    name="right back LL">
+  <link name="right back LL">
     <inertial>
       <origin
         xyz="-6.93889390390723E-15 0.00719227035185524 0.0979123541407748"
@@ -722,8 +698,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="right back LL joint"
+  <joint name="right back LL joint"
     type="revolute">
     <origin
       xyz="0 0.0678000000000027 0.25"
