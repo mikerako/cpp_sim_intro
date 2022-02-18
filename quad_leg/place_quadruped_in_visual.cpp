@@ -19,6 +19,7 @@
 #include "drake/systems/framework/diagram.h"
 #include "drake/systems/framework/diagram_builder.h"
 #include "drake/systems/primitives/constant_vector_source.h"
+#include "drake/systems/primitives/zero_order_hold.h"
 
 #include "drake/common/find_resource.h"
 #include "drake/geometry/drake_visualizer.h"
@@ -37,6 +38,50 @@ namespace quadruped {
 
 static const char* const kQuadrupedURDFPath = 
   "../models/urdf/quadf.urdf"; // <--relative_path
+
+class PassThru final : public systems::LeafSystem<double> {
+public:
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(PassThru);
+
+  /// Creates, adds, and connects a ContactObserver system into the given
+  /// `builder`.
+  ///
+  /// The return value pointer is an alias of the new
+  /// %ContactObserver system that is owned by the `builder`.
+  static PassThru* AddToBuilder(
+      systems::DiagramBuilder<double>& builder,
+      const systems::OutputPort<double>& plant_contact_port) {
+        DRAKE_THROW_UNLESS(&builder != nullptr);
+
+        auto pass_through = builder.AddSystem(
+            std::unique_ptr<PassThru>(
+                new PassThru()));
+        builder.Connect(
+            plant_contact_port,
+            pass_through->get_input_port(0));
+
+        return pass_through;
+  }
+
+private:
+  PassThru() {
+    DeclareAbstractInputPort("contact", Value<multibody::ContactResults<double>>());
+    // DeclarePerStepPublishEvent(&ContactObserver::PrintContactResults);
+    // DeclareAbstractOutputPort("contacting_feet", Value<multibody::ContactResults<double>>(), &PassThru::CalcOutput);
+    DeclareAbstractOutputPort("contacting_feet", &PassThru::CalcOutput);
+    // std::cout << "Constructed the ContactObserver\n";
+  }
+
+  void CalcOutput(const systems::Context<double>& context, multibody::ContactResults<double>* output) const {
+    // const auto& contact_input_port = get_input_port(0);
+    // std::cout << contact_input_port.GetFullDescription() << "\n";
+    const auto& contact_results = get_input_port(0).Eval<multibody::ContactResults<double>>(context);
+    
+
+    *output = contact_results;
+  }
+};
+
 
 /// Prints contact results to terminal at every timestep of simulation
 ///
@@ -81,38 +126,40 @@ public:
 private:
   ContactObserver() {
     DeclareAbstractInputPort("contact", Value<multibody::ContactResults<double>>());
-    DeclarePerStepPublishEvent(&ContactObserver::PrintContactResults);
+    // DeclarePerStepPublishEvent(&ContactObserver::PrintContactResults);
     DeclareVectorOutputPort("contacting_feet", 4, &ContactObserver::EvalFeet);
     std::cout << "Constructed the ContactObserver\n";
   }
 
   void EvalFeet(const systems::Context<double>& context, systems::BasicVector<double>* output) const {
-    const auto& contact_results = get_input_port(0).Eval<multibody::ContactResults<double>>(context);
+    const auto& contact_input_port = get_input_port(0);
+    std::cout << contact_input_port.GetFullDescription() << "\n";
+    const auto& contact_results = contact_input_port.Eval<multibody::ContactResults<double>>(context);
+    // const auto& contact_results = get_input_port(0).HasValue(context);
     // const auto& contact_results2 = get_input_port(1).Eval<multibody::ContactResults<double>>(context);
 
-    std::cout << "PLEASEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE222222\n";
+    std::cout << "**************************************************************************\n";
 
     // Declare a vector for the foot contact results and init to zero (false)
-    std::cout << "Declaration here\n";
     // Vector4<double> feet_in_contact{0.0,0.0,0.0,0.0};
-    Eigen::Vector4d feet_in_contact(0.0,0.0,0.0,0.0);
+    auto feet_in_contact = Eigen::VectorXd::Zero(4);
 
     std::cout << "Evaluating feet\n";
 
-    int num_of_contacts = contact_results.num_point_pair_contacts();
+    // int num_of_contacts = contact_results.num_point_pair_contacts();
     // for(int i = 0; i < num_of_contacts; ++i){
     //   multibody::PointPairContactInfo<double> pair_i = contact_results.point_pair_contact_info(i);
     //   std::cout << "Contact force for pair " << i << " is: " << pair_i.contact_force() << "\n";
     // }
-    int ground_contacts = 0;
-    for(int i = 0; i < num_of_contacts; ++i){
-      multibody::PointPairContactInfo<double> pair_i = contact_results.point_pair_contact_info(i);
-      // std::cout << "body A idx: " << pair_i.bodyA_index() << "\t|\tbody B idx: " << pair_i.bodyB_index() << "\n";
-      if (pair_i.bodyA_index() == 0 || pair_i.bodyB_index() == 0){
-        //one of the colliding bodies was the ground (Michael believes)
-        ground_contacts++;
-      }
-    }
+    // int ground_contacts = 0;
+    // for(int i = 0; i < num_of_contacts; ++i){
+    //   multibody::PointPairContactInfo<double> pair_i = contact_results.point_pair_contact_info(i);
+    //   // std::cout << "body A idx: " << pair_i.bodyA_index() << "\t|\tbody B idx: " << pair_i.bodyB_index() << "\n";
+    //   if (pair_i.bodyA_index() == 0 || pair_i.bodyB_index() == 0){
+    //     //one of the colliding bodies was the ground (Michael believes)
+    //     ground_contacts++;
+    //   }
+    // }
 
     output->set_value(feet_in_contact);
   }
@@ -133,13 +180,13 @@ private:
     int ground_contacts = 0;
     for(int i = 0; i < num_of_contacts; ++i){
       multibody::PointPairContactInfo<double> pair_i = contact_results.point_pair_contact_info(i);
-      // std::cout << "body A idx: " << pair_i.bodyA_index() << "\t|\tbody B idx: " << pair_i.bodyB_index() << "\n";
+      std::cout << "body A idx: " << pair_i.bodyA_index() << "\t|\tbody B idx: " << pair_i.bodyB_index() << "\n";
       if (pair_i.bodyA_index() == 0 || pair_i.bodyB_index() == 0){
         //one of the colliding bodies was the ground (Michael believes)
         ground_contacts++;
       }
     }
-    // std::cout << "There were a total of " << ground_contacts << " contacts with the ground!\n";
+    std::cout << "There were a total of " << ground_contacts << " contacts with the ground!\n";
 
     return systems::EventStatus::Succeeded();
   }
@@ -178,28 +225,27 @@ public:
         DRAKE_THROW_UNLESS(&builder != nullptr);
 
         auto grf_controller = builder.AddSystem(
-            std::unique_ptr<GRFController>(
-                new GRFController(mbp)));
+            std::make_unique<GRFController>(mbp));
         builder.Connect(
             mbp->get_state_output_port(),
             grf_controller->get_input_port(0));
         builder.Connect(
             reference->get_output_port(),
             grf_controller->get_input_port(1));
-        builder.Connect(
-            grf_controller->get_output_port(0),
-            mbp->get_actuation_input_port());
+        // builder.Connect(
+        //     grf_controller->get_output_port(0),
+        //     );
 
         return grf_controller;
   }
 
- private:
+
   GRFController(const multibody::MultibodyPlant<double>* mbp) 
     : plant(mbp) {
     // Define controller input ports
     DeclareVectorInputPort("state", mbp->num_multibody_states());
     DeclareVectorInputPort("reference_grf", 12); //size 12 vector of forces at feet wrt base frame
-    DeclareVectorInputPort("feets_in_contact", 4);
+    DeclareVectorInputPort("feet_in_contact", 4);
 
     // Define controller output ports
     DeclareVectorOutputPort("output_torques", mbp->num_actuators(), &GRFController::CalcGeneralizedOutput);
@@ -217,7 +263,7 @@ public:
 
     std::cout << "Constructed the GRFController\n";
   }
-
+ private:
   void SetMultibodyContext(const systems::Context<double>& context,
                            systems::Context<double>* multibody_plant_context) const {
     const VectorX<double>& x = get_input_port(0).Eval(context);
@@ -228,7 +274,7 @@ public:
       // auto full_state = get_input_port(0).Eval(context);
       auto desired_grf = get_input_port(1).Eval(context);
       // std::cout << "value? " << get_input_port(2).HasValue(context) << "\n";
-      // auto feets_in_contact = get_input_port(2).Eval(context);
+      auto feets_in_contact = get_input_port(2).Eval(context);
       // auto feets_in_contact = get_input_port(2).HasValue(context);
       // std::cout << "\nfeets\n" << feets_in_contact << "\n\n";
       std::vector<bool> feet_in_contact = {true,true,true,true};
@@ -265,8 +311,6 @@ public:
                                                  multibody::JacobianWrtVariable::kQDot, 
                                                  plant->GetFrameByName("left front LL"), 
                                                  Vector3<double>{0.0,0.0,0.0},
-                                                //  plant->GetFrameByName("front left hip"), 
-                                                //  plant->GetFrameByName("front left hip"),
                                                  plant->GetFrameByName("base"), 
                                                  plant->GetFrameByName("base"),
                                                  &Jq_V_WEp);
@@ -277,8 +321,6 @@ public:
                                                  multibody::JacobianWrtVariable::kQDot, 
                                                  plant->GetFrameByName("right front LL"), 
                                                  Vector3<double>{0.0,0.0,0.0},
-                                                //  plant->GetFrameByName("front right hip"), 
-                                                //  plant->GetFrameByName("front right hip"),
                                                  plant->GetFrameByName("base"), 
                                                  plant->GetFrameByName("base"),
                                                  &Jq_V_WEp);
@@ -288,8 +330,6 @@ public:
                                                  multibody::JacobianWrtVariable::kQDot, 
                                                  plant->GetFrameByName("left back LL"), 
                                                  Vector3<double>{0.0,0.0,0.0},
-                                                //  plant->GetFrameByName("Back left hip"), 
-                                                //  plant->GetFrameByName("Back left hip"),
                                                  plant->GetFrameByName("base"), 
                                                  plant->GetFrameByName("base"),
                                                  &Jq_V_WEp);
@@ -299,42 +339,28 @@ public:
                                                  multibody::JacobianWrtVariable::kQDot, 
                                                  plant->GetFrameByName("right back LL"), 
                                                  Vector3<double>{0.0,0.0,0.0},
-                                                //  plant->GetFrameByName("Back right hip"), 
-                                                //  plant->GetFrameByName("Back right hip"),
                                                  plant->GetFrameByName("base"), 
                                                  plant->GetFrameByName("base"),
                                                  &Jq_V_WEp);
               break;
             // no default bc we do nothing bc should never happen
           }
-          
-          // std::cout << Jq_V_WEp.block<3,2>(3,8+leg_idx*3) << "\n\n";
-
           //torque = Ji.T * Ri.T * fi;
-          //// auto Ji = Jq_V_WEp.bottomRightCorner<3,2>();
           auto Ji = Jq_V_WEp.block<3,3>(3,7+leg_idx*3);
           std::cout << "Ji:\n" << Ji << "\n";
           auto torque_leg_i = Ji.transpose() * fi;
-          // std::cout << "test:\n" << output_torques.segment<3>(leg_idx*3) << "\n";
-          // std::cout << "test2:\n" << torque_leg_i << "\n";
           output_torques.segment<3>(leg_idx*3) = torque_leg_i;
-
         }
       }
 
-      // auto torque = Ji.transpose() * desired_grf;
       std::cout << "torque:" << output_torques << "\n\n";
-      // std::cout << "torque+tau_g:" << torque + tau_g.tail(2) << "\n\n";
-      // // set output
-      // output->set_value(FLAGS_Kp_ * (torque + tau_g.tail(2)));
-      
-      output->set_value(output_torques);
-      // output->set_value(desired_grf);
+      // output->set_value(FLAGS_Kp_ * (torque + tau_g.tail(2))); // old
 
+      // set output
+      output->set_value(output_torques);
     }
 
     const multibody::MultibodyPlant<double>* plant;
-    // std::unique_ptr<systems::Context<double>> multibody_plant_context;
     systems::CacheIndex multibody_plant_context_cache_index;
 };
 
@@ -374,19 +400,13 @@ int do_main() {
   const std::string urdf_path = kQuadrupedURDFPath;
   multibody::ModelInstanceIndex plant_model_instance_index = 
     parser.AddModelFromFile(urdf_path);
-  // quadruped->AddFrame(FixedOffsetFrame("left front foot",
-  //                                      quadruped->GetFrameByName(""),
-  //                                      RigidTransform(),
-  //                                      plant_model_instance_index));
   (void)plant_model_instance_index;
-
 
   // add collision geometry and visuals for the ground
   add_ground(quadruped);
 
   // Now the MultibodyPlant is complete
   quadruped->Finalize();
-
 
   // temp hack for having a simple standing controller!
   Eigen::Matrix<double,12,1> desired_forces;
@@ -399,14 +419,33 @@ int do_main() {
       desired_forces
       // Eigen::VectorXd::Zero(12) // Command all actuators of the quadruped to be non-actuated
     );
+
+  auto ZOH = builder.AddSystem<systems::ZeroOrderHold<double>>(FLAGS_max_time_step, quadruped->num_actuators());
+  builder.Connect(ZOH->get_output_port(),quadruped->get_actuation_input_port());
+  
+
   // builder.Connect(desired_base_source->get_output_port(),
   //                 quadruped->get_actuation_input_port()); 
   GRFController* grf_controller = //static const GRFController*
     GRFController::AddToBuilder(builder, desired_base_source, quadruped);
   
-  std::cout << "added controller to the diagram\n";
+  builder.Connect(grf_controller->get_output_port(),ZOH->get_input_port());
+
+  std::cout << "added controller to the diagram ---------------\n";
                  
+  // auto pass_thru 
+  //   = builder.AddSystem<    systems::PassThrough<  Value<multibody::ContactResults<double>>  >    >(
+  //       Value<multibody::ContactResults<double>>()
+  //     );
+  
+  // builder.Connect(
+  //   quadruped->get_contact_results_output_port(),
+  //   pass_thru->get_input_port());
+
+  // auto pass_thru = PassThru::AddToBuilder(builder, quadruped->get_contact_results_output_port());
+
   // Add (simulation) foot contact "estimator"
+  // auto contact_observer = ContactObserver::AddToBuilder(builder, pass_thru->get_output_port(), grf_controller->get_input_port(2));
   auto contact_observer = ContactObserver::AddToBuilder(builder, quadruped->get_contact_results_output_port(), grf_controller->get_input_port(2));
 
   // builder.Connect(
