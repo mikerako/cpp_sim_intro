@@ -85,7 +85,7 @@
   <joint name="front left hip joint"
     type="revolute">
     <origin
-      xyz="-0.125000000000013 0.282500000000001 -0.0266306081677672"
+      xyz="-0.15000000000013 0.282500000000001 -0.0266306081677672"
       rpy="0 0 -3.14159265358979" />
     <parent
       link="base" />
@@ -149,11 +149,11 @@
       link="left front UL" />
     <axis
       xyz="0 1 0" />
-    <limit
+    <!-- <limit
       lower="-6"
       upper="6"
       effort="9"
-      velocity="5" />
+      velocity="5" /> -->
   </joint>
   <link name="left front LL">
     <inertial>
@@ -211,6 +211,34 @@
       effort="9"
       velocity="5" />
   </joint>
+  <link name="left front foot">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+  </link>
+  <joint name="left front foot joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.220"
+      rpy="0 0 0" />
+    <parent
+      link="left front LL" />
+    <child
+      link="left front foot" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
   <link name="front right hip">
     <inertial>
       <origin
@@ -253,7 +281,7 @@
   <joint name="front right hip joint"
     type="revolute">
     <origin
-      xyz="0.124999999999999 0.283000000000001 -0.0266306081677545"
+      xyz="0.14999999999999 0.283000000000001 -0.0266306081677545"
       rpy="-3.14159265358979 0 0" />
     <parent
       link="base" />
@@ -317,11 +345,11 @@
       link="right front UL" />
     <axis
       xyz="0 1 0" />
-    <limit
+    <!-- <limit
       lower="-6"
       upper="6"
       effort="9"
-      velocity="5" />
+      velocity="5" /> -->
   </joint>
   <link name="right front LL">
     <inertial>
@@ -379,6 +407,34 @@
       effort="9"
       velocity="5" />
   </joint>
+  <link name="right front foot">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+  </link>
+  <joint name="right front foot joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.220"
+      rpy="0 0 0" />
+    <parent
+      link="right front LL" />
+    <child
+      link="right front foot" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
   <link name="Back left hip">
     <inertial>
       <origin
@@ -421,7 +477,7 @@
   <joint name="Back left hip joint"
     type="revolute">
     <origin
-      xyz="-0.125000000000011 -0.310800000000001 -0.0266306081677699"
+      xyz="-0.15000000000011 -0.310800000000001 -0.0266306081677699"
       rpy="3.14159265358979 0 -3.14159265358979" />
     <parent
       link="base" />
@@ -485,11 +541,11 @@
       link="left back UL" />
     <axis
       xyz="0 1 0" />
-    <limit
+    <!-- <limit
       lower="-6"
       upper="6"
       effort="9"
-      velocity="5" />
+      velocity="5" /> -->
   </joint>
   <link name="left back LL">
     <inertial>
@@ -547,6 +603,34 @@
       effort="9"
       velocity="5" />
   </joint>
+  <link name="left back foot">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+  </link>
+  <joint name="left back foot joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.220"
+      rpy="0 0 0" />
+    <parent
+      link="left back LL" />
+    <child
+      link="left back foot" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
   <link name="Back right hip">
     <inertial>
       <origin
@@ -589,7 +673,7 @@
   <joint name="Back right hip joint"
     type="revolute">
     <origin
-      xyz="0.12499999999998 -0.3103 -0.0266306081677744"
+      xyz="0.1499999999998 -0.3103 -0.0266306081677744"
       rpy="0 0 0" />
     <parent
       link="base" />
@@ -653,11 +737,11 @@
       link="right back UL" />
     <axis
       xyz="0 1 0" />
-    <limit
+    <!-- <limit
       lower="-6"
       upper="6"
       effort="9"
-      velocity="5" />
+      velocity="5" /> -->
   </joint>
   <link name="right back LL">
     <inertial>
@@ -714,6 +798,34 @@
       upper="6"
       effort="9"
       velocity="5" />
+  </joint>
+  <link name="right back foot">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+  </link>
+  <joint name="right back foot joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.220"
+      rpy="0 0 0" />
+    <parent
+      link="right back LL" />
+    <child
+      link="right back foot" />
+    <axis
+      xyz="0 0 0" />
   </joint>
 
   <transmission name="Actuator1_transmission" >
